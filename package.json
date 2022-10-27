@@ -1,0 +1,26 @@
+{
+  "name": "ribpl-bajaj-general-svc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Real-Insurance-brokers-integration/ribpl-bajaj-general-svc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Real-Insurance-brokers-integration/ribpl-bajaj-general-svc/issues"
+  },
+  "homepage": "https://github.com/Real-Insurance-brokers-integration/ribpl-bajaj-general-svc#readme",
+  "devDependencies": {
+    "serverless-offline": "^6.5.0",
+    "sls": "^0.1.0"
+  },
+  "dependencies": {
+    "serverless-python-requirements": "^5.2.0"
+  }
+}

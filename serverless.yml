@@ -1,0 +1,126 @@
+service: timpl-bajaj-general-svc
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: dev
+  region: ap-south-1
+  versionFunctions: false
+  environment:
+    SERVICE_BASE_URL: ${self:custom.SERVICE_BASE_URL}
+    AuthToken: ${self:custom.AuthToken}
+    UserID: ${self:custom.UserID}
+    PamentURL: ${self:custom.PamentURL}
+    PAYMENT_CALLBACK_URL: ${self:custom.PAYMENT_CALLBACK_URL}
+
+  vpc:
+    securityGroupIds:
+      - ${ssm:securitygroupid}
+    subnetIds:
+      - ${ssm:subnetid1}
+      - ${ssm:subnetid2}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ssm:GetParameters
+        - ssm:GetParameter
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "lambda:InvokeFunction"
+      Resource: "*"
+
+
+custom:
+    stage: ${opt:stage, self:provider.stage}
+    region: ${opt:region, self:provider.region}
+    config: ${file(./env.yml)}
+    SERVICE_BASE_URL: ${self:custom.config.${self:custom.stage}.SERVICE_BASE_URL}
+    AuthToken: ${self:custom.config.${self:custom.stage}.AuthToken}
+    UserID: ${self:custom.config.${self:custom.stage}.UserID}
+    PAYMENT_CALLBACK_URL: ${self:custom.config.${self:custom.stage}.PAYMENT_CALLBACK_URL}
+    PamentURL: ${self:custom.config.${self:custom.stage}.PamentURL}
+
+plugins:
+    - serverless-offline
+
+functions:
+  calculate_premium:
+    handler: handler.calculate_premium
+    events:
+      - http:
+          path: "calculate-premium"
+          contentType: "application/json"
+          method: post
+          cors: true
+          documentation:
+            summary: "used to calculate premium and idv of vehicles"
+    timeout: 29
+
+  generateInspectionPin:
+    handler: breakin.generateInspectionPin
+    events:
+      - http:
+        path: "generate-inspection-id"
+        contentType: "application/soap+xml"
+        method: post
+        cors: true
+        documentation:
+          summary: "used to generate inspection pin for expired policy"
+    timeout: 29 
+
+  checkInspectionPinStatus:
+    handler: breakin.checkInspectionPinStatus
+    events:
+      - http:
+          path: "get-inspection-status"
+          contentType: "application/soap+xml"
+          method: post
+          cors: true
+          documentation:
+            summary: "used to validate inspection pin status"
+    timeout: 29   
+  
+  fetchPolicyInfoByPolicyNo:
+    handler: handler.fetchPolicyInfoByPolicyNo
+    events:
+      - http:
+          path: "get-policy-info"
+          contentType: "application/json"
+          method: post
+          cors: true
+          documentation:
+            summary: "used to get the quote and IDV value of the vehicle"
+    timeout: 29
+
+  create_proposal:
+    handler: handler.create_proposal
+    timeout: 29
+    events:
+      - http:
+          path: "generate-quote"
+          contentType: "application/json"
+          method: post
+          cors: true
+          documentation:
+            summary: "used to create proposal for the vehicle"
+            
+  generatePaymentLink:
+    handler: handler.generatePaymentLink
+    timeout: 29
+    events:
+      - http:
+          path: "make-payment"
+          contentType: "application/json"
+          method: post
+          cors: true
+
+  downloadPolicy:
+    handler: handler.downloadPolicy
+    timeout: 29
+    events:
+      - http:
+          path: "download-policy"
+          contentType: "application/json"
+          method: post
+          cors: true
